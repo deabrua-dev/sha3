@@ -1,10 +1,7 @@
 #[cfg(test)]
 mod test {
-    use std::result;
-
-    use crate::sha_3::*;
+    use sha_3::*;
     use hex::encode;
-
     
     #[test]
     fn sha3_224_test() {

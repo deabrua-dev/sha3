@@ -49,45 +49,44 @@ const CAPACITY_ARRAY: [u64; 4] = [ 448, 512, 768, 1024 ];
 
 const ROUNDS: usize = 24;
 
-fn round_b(A: &mut [[u64; 5]; 5]) {
+fn round_b(lanes: &mut [[u64; 5]; 5]) {
     for i in 0..ROUNDS {
-        let mut C = [0; 5];
-        let mut D = [0; 5];
-        let mut B = [[0; 5]; 5];
+        let mut c = [0; 5];
+        let mut d = [0; 5];
+        let mut b = [[0; 5]; 5];
 
         // Theta Step
         for x in 0..5 {
-            C[x] = A[x][0] ^ A[x][1] ^ A[x][2] ^ A[x][3] ^ A[x][4];
+            c[x] = lanes[x][0] ^ lanes[x][1] ^ lanes[x][2] ^ lanes[x][3] ^ lanes[x][4];
         }
         for x in 0..5 {
-            D[x] = C[(x + 4) % 5] ^ C[(x + 1) % 5].rotate_left(1);
+            d[x] = c[(x + 4) % 5] ^ c[(x + 1) % 5].rotate_left(1);
         }
         for x in 0..5 {
             for y in 0..5 {
-                A[x][y] ^= D[x];
+                lanes[x][y] ^= d[x];
             }
         }
         // Rho and Pi Steps
         for x in 0..5 {
             for y in 0..5 {
-                B[y][(2 * x + 3 * y) % 5] = A[x][y].rotate_left(ROTATION_OFFSET[x][y]);
+                b[y][(2 * x + 3 * y) % 5] = lanes[x][y].rotate_left(ROTATION_OFFSET[x][y]);
             }
         }
         // Chi Step
         for x in 0..5 {
             for y in 0..5 {
-                A[x][y] = B[x][y] ^ ((!B[(x + 1) % 5][y]) & B[(x + 2) % 5][y])
+                lanes[x][y] = b[x][y] ^ ((!b[(x + 1) % 5][y]) & b[(x + 2) % 5][y])
             }
         }
         // Iota step
-        A[0][0] ^= RND_C[i];
+        lanes[0][0] ^= RND_C[i];
     }
 }
 
 fn keccak_f1600(state: &mut [u8; 200]) {
     let mut lanes: [[u64; 5]; 5]  = [[0; 5]; 5];
     for x in 0..5 {
-        let mut temp: Vec<u64> = vec![];
         for y in 0..5 {
             lanes[x][y] = u64::from_le_bytes(state[(8 * (x + 5 * y))..(8 * (x + 5 * y) + 8)].try_into().unwrap())
         }

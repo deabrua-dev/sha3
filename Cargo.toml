@@ -2,11 +2,25 @@
 name = "sha3"
 version = "0.1.0"
 edition = "2021"
+authors = ["deabrua-dev"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "sha_3"
+path = "src/lib.rs"
+
+[[bin]]
+name = "main"
+path = "src/bin.rs"
+
 [dependencies]
-# sha3 = "0.10.8"
 hex = "0.4.3"
-tiny-keccak = { version = "2.0", features = ["keccak"] }
-# memory-stats = "1.1.0"
+sha3 = "0.10.8"
+tiny-keccak = { version = "2.0.2", features = ["sha3"] }
+memory-stats = "1.1.0"
+criterion = "0.5.1"
+
+[[bench]]
+name = "benchmarks"
+harness = false
