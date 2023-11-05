@@ -1,0 +1,12 @@
+[package]
+name = "sha3"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# sha3 = "0.10.8"
+hex = "0.4.3"
+tiny-keccak = { version = "2.0", features = ["keccak"] }
+# memory-stats = "1.1.0"
