@@ -49,7 +49,7 @@ const CAPACITY_ARRAY: [u64; 4] = [ 448, 512, 768, 1024 ];
 
 const ROUNDS: usize = 24;
 
-fn round_b(A: &mut Vec<Vec<u64>>) {
+fn round_b(A: &mut [[u64; 5]; 5]) {
     for i in 0..ROUNDS {
         let mut C = [0; 5];
         let mut D = [0; 5];
@@ -84,14 +84,13 @@ fn round_b(A: &mut Vec<Vec<u64>>) {
     }
 }
 
-fn keccak_f1600(state: &mut Vec<u8>) {
-    let mut lanes: Vec<Vec<u64>>  = vec![];
+fn keccak_f1600(state: &mut [u8; 200]) {
+    let mut lanes: [[u64; 5]; 5]  = [[0; 5]; 5];
     for x in 0..5 {
         let mut temp: Vec<u64> = vec![];
         for y in 0..5 {
-            temp.push(u64::from_le_bytes(state[(8 * (x + 5 * y))..(8 * (x + 5 * y) + 8)].try_into().unwrap()));
+            lanes[x][y] = u64::from_le_bytes(state[(8 * (x + 5 * y))..(8 * (x + 5 * y) + 8)].try_into().unwrap())
         }
-        lanes.push(temp);
     }
     round_b(&mut lanes);
     for x in 0..5 {
@@ -129,7 +128,7 @@ pub fn keccak(input_bytes: &[u8], length: SHA3) -> Result<Vec<u8>, String> {
     let mut output_bytes_len = (capacity / 16) as usize;
 
     let mut output_bytes = vec![];
-    let mut state = vec![0; 200];
+    let mut state = [0; 200];
     
     let mut input_offset = 0;
     let mut block_size = 0;
