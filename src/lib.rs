@@ -1,162 +1,162 @@
-pub enum SHA3 {
-    SHA3_224,
-    SHA3_256,
-    SHA3_384,
-    SHA3_512,
-    KECCAK_224,
-    KECCAK_256,
-    KECCAK_384,
-    KECCAK_512
+mod keccak;
+use keccak::*;
+
+pub struct SHA3_224 {
+    rate: u64,
+    capacity: u64,
+    delimiter: u8,
 }
 
-const ROTATION_OFFSET: [[u32; 5]; 5] = [
-    [0, 36, 3, 41, 18],
-    [1, 44, 10, 45, 2],
-    [62, 6, 43, 15, 61],
-    [28, 55, 25, 21, 56],
-    [27, 20, 39, 8, 14],
-];
-
-const RND_C: [u64; 24] = [
-    0x0000000000000001, 
-    0x0000000000008082, 
-    0x800000000000808A,
-    0x8000000080008000, 
-    0x000000000000808B, 
-    0x0000000080000001,
-    0x8000000080008081, 
-    0x8000000000008009, 
-    0x000000000000008A,
-    0x0000000000000088, 
-    0x0000000080008009, 
-    0x000000008000000A,
-    0x000000008000808B, 
-    0x800000000000008B, 
-    0x8000000000008089,
-    0x8000000000008003, 
-    0x8000000000008002, 
-    0x8000000000000080,
-    0x000000000000800A, 
-    0x800000008000000A, 
-    0x8000000080008081,
-    0x8000000000008080, 
-    0x0000000080000001, 
-    0x8000000080008008
-];
-
-const RATE_ARRAY: [u64; 4] = [ 1152, 1088, 832, 576 ];
-const CAPACITY_ARRAY: [u64; 4] = [ 448, 512, 768, 1024 ];
-
-const ROUNDS: usize = 24;
-
-fn round_b(lanes: &mut [[u64; 5]; 5]) {
-    for i in 0..ROUNDS {
-        let mut c = [0; 5];
-        let mut d = [0; 5];
-        let mut b = [[0; 5]; 5];
-
-        // Theta Step
-        for x in 0..5 {
-            c[x] = lanes[x][0] ^ lanes[x][1] ^ lanes[x][2] ^ lanes[x][3] ^ lanes[x][4];
+impl SHA3_224 {
+    pub fn new() -> Self {
+        SHA3_224 {
+            rate: 1152,
+            capacity: 448,
+            delimiter: 0x06,
         }
-        for x in 0..5 {
-            d[x] = c[(x + 4) % 5] ^ c[(x + 1) % 5].rotate_left(1);
-        }
-        for x in 0..5 {
-            for y in 0..5 {
-                lanes[x][y] ^= d[x];
-            }
-        }
-        // Rho and Pi Steps
-        for x in 0..5 {
-            for y in 0..5 {
-                b[y][(2 * x + 3 * y) % 5] = lanes[x][y].rotate_left(ROTATION_OFFSET[x][y]);
-            }
-        }
-        // Chi Step
-        for x in 0..5 {
-            for y in 0..5 {
-                lanes[x][y] = b[x][y] ^ ((!b[(x + 1) % 5][y]) & b[(x + 2) % 5][y])
-            }
-        }
-        // Iota step
-        lanes[0][0] ^= RND_C[i];
+    }
+
+    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
+        keccak(input, self.rate, self.capacity, self.delimiter, output)
     }
 }
 
-fn keccak_f1600(state: &mut [u8; 200]) {
-    let mut lanes: [[u64; 5]; 5]  = [[0; 5]; 5];
-    for x in 0..5 {
-        for y in 0..5 {
-            lanes[x][y] = u64::from_le_bytes(state[(8 * (x + 5 * y))..(8 * (x + 5 * y) + 8)].try_into().unwrap())
-        }
-    }
-    round_b(&mut lanes);
-    for x in 0..5 {
-        for y in 0..5 {
-            let temp = lanes[x][y].to_le_bytes();
-            for (i, &t) in temp.iter().enumerate() {
-                state[8 * (x + 5 * y) + i] = t;
-            }
-        }
-    }
+pub struct SHA3_256 {
+    rate: u64,
+    capacity: u64,
+    delimiter: u8,
 }
 
-pub fn keccak(input_bytes: &[u8], length: SHA3) -> Result<Vec<u8>, String> {
-    let input_bytes_len = input_bytes.len();
-
-    let rcd = match length {
-        SHA3::SHA3_224 => (RATE_ARRAY[0], CAPACITY_ARRAY[0], 0x06),
-        SHA3::SHA3_256 => (RATE_ARRAY[1], CAPACITY_ARRAY[1], 0x06),
-        SHA3::SHA3_384 => (RATE_ARRAY[2], CAPACITY_ARRAY[2], 0x06),
-        SHA3::SHA3_512 => (RATE_ARRAY[3], CAPACITY_ARRAY[3], 0x06),
-        SHA3::KECCAK_224 => (RATE_ARRAY[0], CAPACITY_ARRAY[0], 0x01),
-        SHA3::KECCAK_256 => (RATE_ARRAY[1], CAPACITY_ARRAY[1], 0x01),
-        SHA3::KECCAK_384 => (RATE_ARRAY[2], CAPACITY_ARRAY[2], 0x01),
-        SHA3::KECCAK_512 => (RATE_ARRAY[3], CAPACITY_ARRAY[3], 0x01),
-    };
-    let rate = rcd.0;
-    let capacity = rcd.1;
-    let delimiter = rcd.2;
-
-    if rate + capacity != 1600 || rate % 8 != 0 {
-        return Err(String::from("Error"));
+impl SHA3_256 {
+    pub fn new() -> Self {
+        SHA3_256 {
+            rate: 1088,
+            capacity: 512,
+            delimiter: 0x06,
+        }
     }
-    let rates_in_bytes = (rate / 8) as usize;
-
-    let mut output_bytes_len = (capacity / 16) as usize;
-
-    let mut output_bytes = vec![];
-    let mut state = [0; 200];
     
-    let mut input_offset = 0;
-    let mut block_size = 0;
-
-    while input_offset < input_bytes_len {
-        block_size = std::cmp::min(input_bytes_len - input_offset, rates_in_bytes);
-        for i in 0..block_size {
-            state[i] ^= input_bytes[i + input_offset];
-        }
-        input_offset += block_size;
-        if block_size == rates_in_bytes {
-            keccak_f1600(&mut state);
-        }
+    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
+        keccak(input, self.rate, self.capacity, self.delimiter, output)
     }
-    state[block_size] ^= delimiter;
+}
 
-    if (delimiter & 0x80) != 0 && (block_size == rates_in_bytes - 1) {
-        keccak_f1600(&mut state);
-    }
-    state[rates_in_bytes - 1] ^= 0x80;
-    keccak_f1600(&mut state);
+pub struct SHA3_384 {
+    rate: u64,
+    capacity: u64,
+    delimiter: u8,
+}
 
-    while output_bytes_len > 0 {
-        block_size = std::cmp::min(output_bytes_len, rates_in_bytes as usize);
-        output_bytes.append(&mut state[0..block_size].to_vec());
-        output_bytes_len -= block_size;
-        if output_bytes_len > 0 {
-            keccak_f1600(&mut state);
+impl SHA3_384 {
+    pub fn new() -> Self {
+        SHA3_384 {
+            rate: 832,
+            capacity: 768,
+            delimiter: 0x06,
         }
     }
-    Ok(output_bytes)
+    
+    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
+        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    }
+}
+
+pub struct SHA3_512 {
+    rate: u64,
+    capacity: u64,
+    delimiter: u8,
+}
+
+impl SHA3_512 {
+    pub fn new() -> Self {
+        SHA3_512 {
+            rate: 576,
+            capacity: 1024,
+            delimiter: 0x06,
+        }
+    }
+    
+    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
+        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    }
+}
+
+pub struct Keccak224 {
+    rate: u64,
+    capacity: u64,
+    delimiter: u8,
+}
+
+impl Keccak224 {
+    pub fn new() -> Self {
+        Keccak224 {
+            rate: 1152,
+            capacity: 448,
+            delimiter: 0x01,
+        }
+    }
+    
+    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
+        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    }
+}
+
+pub struct Keccak256 {
+    rate: u64,
+    capacity: u64,
+    delimiter: u8,
+}
+
+impl Keccak256 {
+    pub fn new() -> Self {
+        Keccak256 {
+            rate: 1088,
+            capacity: 512,
+            delimiter: 0x01,
+        }
+    }
+    
+    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
+        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    }
+}
+
+pub struct Keccak384 {
+    rate: u64,
+    capacity: u64,
+    delimiter: u8,
+}
+
+impl Keccak384 {
+    pub fn new() -> Self {
+        Keccak384 {
+            rate: 832,
+            capacity: 768,
+            delimiter: 0x01,
+        }
+    }
+    
+    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
+        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    }
+}
+
+pub struct Keccak512 {
+    rate: u64,
+    capacity: u64,
+    delimiter: u8,
+}
+
+impl Keccak512 {
+    pub fn new() -> Self {
+        Keccak512 {
+            rate: 576,
+            capacity: 1024,
+            delimiter: 0x01,
+        }
+    }
+    
+    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
+        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    }
 }

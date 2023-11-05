@@ -1,12 +1,14 @@
 use criterion::{criterion_group, criterion_main, Criterion};
 use sha3::{Sha3_256, Digest};
-use sha_3::*;
 use tiny_keccak::*;
+use sha_3::*;
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let text = b"Hello world!";
     c.bench_function("My sha_3 implementation", |b| b.iter(|| {
-        keccak(text, SHA3::SHA3_256).unwrap();
+        let mut output = [0u8; 32];
+        let hasher = SHA3_256::new();
+        hasher.hash(text, &mut output);
     }));
     c.bench_function("Crate sha3", |b| b.iter(|| {
         let mut hasher = Sha3_256::new();
@@ -20,5 +22,6 @@ pub fn criterion_benchmark(c: &mut Criterion) {
         sha3.finalize(&mut output);
     }));
 }
+
 criterion_group!(benches, criterion_benchmark);
 criterion_main!(benches);
