@@ -6,9 +6,8 @@ use sha_3::*;
 pub fn criterion_benchmark(c: &mut Criterion) {
     let text = b"Hello world!";
     c.bench_function("My sha_3 implementation", |b| b.iter(|| {
-        let mut output = [0u8; 32];
         let hasher = SHA3_256::new();
-        hasher.hash(text, &mut output);
+        hasher.hash(text);
     }));
     c.bench_function("Crate sha3", |b| b.iter(|| {
         let mut hasher = Sha3_256::new();

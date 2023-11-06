@@ -16,8 +16,10 @@ impl SHA3_224 {
         }
     }
 
-    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
-        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    pub fn hash(&self, input: &[u8]) -> [u8; 28] {
+        let mut output = [0; 28];
+        keccak(input, self.rate, self.capacity, self.delimiter, &mut output);
+        output
     }
 }
 
@@ -36,8 +38,10 @@ impl SHA3_256 {
         }
     }
     
-    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
-        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    pub fn hash(&self, input: &[u8]) -> [u8; 32] {
+        let mut output = [0; 32];
+        keccak(input, self.rate, self.capacity, self.delimiter, &mut output);
+        output
     }
 }
 
@@ -56,8 +60,10 @@ impl SHA3_384 {
         }
     }
     
-    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
-        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    pub fn hash(&self, input: &[u8]) -> [u8; 48] {
+        let mut output = [0; 48];
+        keccak(input, self.rate, self.capacity, self.delimiter, &mut output);
+        output
     }
 }
 
@@ -76,8 +82,10 @@ impl SHA3_512 {
         }
     }
     
-    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
-        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    pub fn hash(&self, input: &[u8]) -> [u8; 64] {
+        let mut output = [0; 64];
+        keccak(input, self.rate, self.capacity, self.delimiter, &mut output);
+        output
     }
 }
 
@@ -96,8 +104,10 @@ impl Keccak224 {
         }
     }
     
-    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
-        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    pub fn hash(&self, input: &[u8]) -> [u8; 28] {
+        let mut output = [0; 28];
+        keccak(input, self.rate, self.capacity, self.delimiter, &mut output);
+        output
     }
 }
 
@@ -116,8 +126,10 @@ impl Keccak256 {
         }
     }
     
-    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
-        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    pub fn hash(&self, input: &[u8]) -> [u8; 32] {
+        let mut output = [0; 32];
+        keccak(input, self.rate, self.capacity, self.delimiter, &mut output);
+        output
     }
 }
 
@@ -136,8 +148,10 @@ impl Keccak384 {
         }
     }
     
-    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
-        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    pub fn hash(&self, input: &[u8]) -> [u8; 48] {
+        let mut output = [0; 48];
+        keccak(input, self.rate, self.capacity, self.delimiter, &mut output);
+        output
     }
 }
 
@@ -156,7 +170,9 @@ impl Keccak512 {
         }
     }
     
-    pub fn hash(&self, input: &[u8], output: &mut [u8]) {
-        keccak(input, self.rate, self.capacity, self.delimiter, output)
+    pub fn hash(&self, input: &[u8]) -> [u8; 64] {
+        let mut output = [0; 64];
+        keccak(input, self.rate, self.capacity, self.delimiter, &mut output);
+        output
     }
 }

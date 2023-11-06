@@ -100,12 +100,13 @@ pub fn keccak(input_bytes: &[u8], rate: u64, capacity: u64, delimiter: u8, outpu
     }
     let rates_in_bytes = (rate / 8) as usize;
 
-    let mut output_bytes_len = (capacity / 16) as usize;
-
     let mut state = [0; 200];
     
     let mut input_offset = 0;
     let mut block_size = 0;
+
+    let mut output_bytes_len = output.len();
+    let mut start_index = 0;
 
     while input_offset < input_bytes_len {
         block_size = min(input_bytes_len - input_offset, rates_in_bytes);
@@ -127,10 +128,9 @@ pub fn keccak(input_bytes: &[u8], rate: u64, capacity: u64, delimiter: u8, outpu
 
     while output_bytes_len > 0 {
         block_size = min(output_bytes_len, rates_in_bytes as usize);
-        for (index,value) in state[0..block_size].iter().enumerate() {
-            output[index] = *value;
-        }
+        output[start_index..(start_index + block_size)].copy_from_slice(state[0..block_size].as_mut());
         output_bytes_len -= block_size;
+        start_index += block_size;
         if output_bytes_len > 0 {
             keccak_f1600(&mut state);
         }
