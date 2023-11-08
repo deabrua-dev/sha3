@@ -9,7 +9,7 @@
 
 ### My sha_3 implementation
 
-![alt text](https://github.com/deabrua-dev/sha3/common/images/sha_3_mean.svg)
+![alt text](https://github.com/deabrua-dev/sha3/blob/main/common/images/sha3_mean.svg)
 
 На рисунку представлено середній час на ітерацію.
 
@@ -28,7 +28,7 @@
 
 ### Crate sha3
 
-![alt text](https://github.com/deabrua-dev/sha3/common/images/sha3_mean.svg)
+![alt text](https://github.com/deabrua-dev/sha3/blob/main/common/images/sha3_mean.svg)
 
 На рисунку представлено середній час на ітерацію.
 
@@ -46,7 +46,7 @@
 
 ### Crate tiny-keccak
 
-![alt text](https://github.com/deabrua-dev/sha3/common/images/tiny_keccak_mean.svg)
+![alt text](https://github.com/deabrua-dev/sha3/blob/main/common/images/tiny_keccak_mean.svg)
 
 На рисунку представлено середній час на ітерацію.
 
